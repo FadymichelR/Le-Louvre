@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Le musée du Louvre{% endblock %}</title>
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+        {% block stylesheets %}
+        {% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+        <script src="{{ asset('assets/js/jquery.js') }}"></script>
+        <style>
+
+            select {
+                padding: 9px 0;
+                width: auto;
+                border: none;
+                border-bottom: 1px solid #ccc;
+                border: 1px solid #ccc!important;
+            }
+        </style>
+    </head>
+    <body>
+        {% block nav %}
+                    <!-- Navbar (sit on top) -->
+        <div class="w3-top">
+          <div class="w3-bar w3-white w3-wide w3-padding w3-card-2">
+            <a href="{{ path('home') }}" class="w3-bar-item w3-button"><b>Le</b> Louvre</a>
+            <!-- Float links to the right. Hide them on small screens -->
+            <div class="w3-right w3-hide-small">
+              <a href="#projects" class="w3-bar-item w3-button">Accueil</a>
+              <a href="{{ path('home') }}" class="w3-bar-item w3-button">billetterie en ligne</a>
+            </div>
+          </div>
+        </div>
+        {% endblock %}
+        {% block body %}{% endblock %}
+        {% block javascripts %}{% endblock %}
+            <!-- Footer -->
+<footer class="w3-center w3-black w3-padding-16">
+  <p>Le Louvre - Tous droits réservés © 2016-2017</p>
+</footer>
+    </body>
+</html>

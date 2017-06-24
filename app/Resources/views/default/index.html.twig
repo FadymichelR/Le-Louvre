@@ -1,0 +1,170 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<!-- Header -->
+<header class="w3-display-container w3-content w3-wide" style="max-width:1500px;" id="home">
+  <img  src="{{ asset('assets/img/louvre.jpg') }}" alt="Architecture" width="1500" height="400">
+  <div class="w3-display-middle w3-margin-top w3-center">
+    <h1 class="w3-xxlarge w3-text-white"><span class="w3-padding w3-black w3-opacity-min">BILLETTERIE</span></h1>
+  </div>
+</header>
+
+<!-- Page content -->
+<div class="w3-content w3-padding" style="max-width:1100px">
+<div class="w3-card-2">
+	<div class="w3-container w3-black">
+      <h2>Billetterie en ligne</h2>
+  </div>
+    <div class="w3-container w3-white w3-padding-16 w3-light-gray">
+    	{{ form_start(form) }}
+        <div class="w3-row-padding" style="margin:0 -16px;">
+          <div class="w3-half w3-margin-bottom">
+            {{ form_label(form.dateVisit) }}
+            {{ form_widget(form.dateVisit) }}
+            {{ form_errors(form.dateVisit) }}
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email) }}
+            {{ form_label(form.type) }}
+            {{ form_widget(form.type) }}  
+            {{ form_errors(form.type) }} 
+          </div>
+          <div class="w3-half w3-card-4 w3-white">   
+            {{ form_widget(form.billets) }}
+        <a href="#" id="add_billet" class="w3-button w3-black w3-section">Ajouter une personne</a>
+          </div>
+        </div>
+        {{ form_widget(form.send) }}
+        {{ form_end(form) }}
+    </div>
+    <div id="info-modal" class="w3-modal">
+    <div class="w3-modal-content">
+      <div class="w3-container">
+        <span onclick="document.getElementById('info-modal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+        <p class="info w3-center"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+<!-- End page content -->
+</div>
+
+
+{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/default.css') }}">
+
+{% endblock %}
+{% block javascripts %}
+<script src="{{ asset('assets/js/picker.js') }}"></script>
+<script>
+$('.datepicker').val('');
+$('.datepicker').pickadate({
+  monthsFull: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+  weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+  today: 'aujourd\'hui',
+  clear: 'effacer',
+  hiddenName: true,
+  min: true,
+  formatSubmit: 'dd/mm/yyyy',
+  onRender: function() {
+    var $input_get__select = $( '.datepicker' ).pickadate();
+    var picker_get__select = $input_get__select.pickadate( 'picker' );
+    var date_visit = picker_get__select.get( 'select', 'dd/mm/yyyy' );
+    if (date_visit != '') {
+      $.ajax({
+         url : '{{ path('availability') }}', 
+         type : 'GET', 
+         data : 'date=' + date_visit,
+         success: function(reponse) { 
+              var reponse = JSON.parse(reponse);
+              if (reponse.quantity >= 1000) {
+                  var text = 'Impossible de réserver à cette date là, plus de 1000 billets ont déja été vendus.';
+                  $('.datepicker').val('');
+              }
+              else if (reponse.quantity < 1000 && reponse.quantity > 990) {
+                var billets = 1000 - reponse.quantity;
+                var text = 'Attention! il ne reste plus que ' + billets + ' billet(s) pour cette date.';
+          
+              }
+              if(typeof(text) != 'undefined') {
+                $('#info-modal').show('slow');
+                $('.info').text(text);
+              }
+          }
+      });
+    }
+  }
+})
+
+</script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    // On récupère la balise <div> en question qui contient l'attribut « data-prototype » qui nous intéresse.
+    var $container = $('div#appbundle_reservation_billets');
+
+    // On définit un compteur unique pour nommer les champs qu'on va ajouter dynamiquement
+    var index = $container.find(':input').length;
+
+    // On ajoute un nouveau champ à chaque clic sur le lien d'ajout.
+    $('#add_billet').click(function(e) {
+      addCategory($container);
+
+      e.preventDefault(); // évite qu'un # apparaisse dans l'URL
+      return false;
+    });
+
+    // On ajoute un premier champ automatiquement s'il n'en existe pas déjà un (cas d'une nouvelle annonce par exemple).
+    if (index == 0) {
+      addCategory($container);
+    } else {
+      // S'il existe déjà des catégories, on ajoute un lien de suppression pour chacune d'entre elles
+      $container.children('div').each(function() {
+        addDeleteLink($(this));
+      });
+    }
+
+    // La fonction qui ajoute un formulaire CategoryType
+    function addCategory($container) {
+      // Dans le contenu de l'attribut « data-prototype », on remplace :
+      // - le texte "__name__label__" qu'il contient par le label du champ
+      // - le texte "__name__" qu'il contient par le numéro du champ
+      var template = $container.attr('data-prototype')
+        .replace(/__name__label__/g, 'Personne n°' + (index+1))
+        .replace(/__name__/g,        index)
+      ;
+
+      // On crée un objet jquery qui contient ce template
+      var $prototype = $(template);
+
+      // On ajoute au prototype un lien pour pouvoir supprimer la catégorie
+      addDeleteLink($prototype);
+
+      // On ajoute le prototype modifié à la fin de la balise <div>
+      $container.append($prototype);
+
+      // Enfin, on incrémente le compteur pour que le prochain ajout se fasse avec un autre numéro
+      index++;
+    }
+
+    // La fonction qui ajoute un lien de suppression d'une catégorie
+    function addDeleteLink($prototype) {
+      // Création du lien
+      var $deleteLink = $('<a href="#" class="w3-button w3-red w3-section">Supprimer</a>');
+
+      // Ajout du lien
+      $prototype.append($deleteLink);
+
+      // Ajout du listener sur le clic du lien pour effectivement supprimer la catégorie
+      $deleteLink.click(function(e) {
+        $prototype.remove();
+
+        e.preventDefault(); // évite qu'un # apparaisse dans l'URL
+        return false;
+      });
+    }
+  });
+</script>
+{% endblock %}
