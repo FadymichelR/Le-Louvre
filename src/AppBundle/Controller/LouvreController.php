@@ -3,11 +3,9 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Reservation;
-use AppBundle\Entity\Billet;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use AppBundle\Form\ReservationType;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use AppBundle\Services\Tarif;
@@ -15,7 +13,6 @@ use AppBundle\Services\Booking;
 use AppBundle\Services\Mail;
 use AppBundle\Services\Stripe;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 class LouvreController extends Controller
@@ -32,11 +29,10 @@ class LouvreController extends Controller
 
         if ($request->isMethod('POST') && $form->handleRequest($request)->isValid()) {
 
-          $data = $form->getData();
           $booking = $this->get(Booking::class);
 
           $etat = $booking->limitOfBooking($reservation->getDateVisit(),$reservation->getType());
-          if ($etat != false) {
+          if ($etat !== false) {
             
             $form->get($etat['name'])->addError(new FormError($etat['msg']));
             return $this->render('default/index.html.twig', array('form' => $form->createView()));
@@ -95,7 +91,7 @@ class LouvreController extends Controller
             ->getForm();
 
               $form->handleRequest($request);
-              if ($form->isSubmitted() && $form->isValid() && $request->request->get('stripeToken') != null) {
+              if ($form->isSubmitted() && $form->isValid() && $request->request->get('stripeToken') !== null) {
                   $session->set('stripeToken', $request->request->get('stripeToken'));
                   return $this->redirectToRoute('paiement', array('number' => $booking->getReference()));
               }
@@ -120,7 +116,7 @@ class LouvreController extends Controller
             $stripe = $this->get(Stripe::class);
             $etatPayment = $stripe->Payment($token,$booking->getEmail(),$booking->getTotalPrice());
 
-            if ($etatPayment == true) {
+            if ($etatPayment === true) {
 
               $em = $this->getDoctrine()->getManager();
               $em->persist($booking);

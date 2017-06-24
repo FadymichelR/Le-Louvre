@@ -1,7 +1,5 @@
 <?php
 namespace AppBundle\Services;
-use AppBundle\Entity\Reservation;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 class Stripe
 {
