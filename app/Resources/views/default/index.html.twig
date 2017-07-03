@@ -59,6 +59,7 @@
 {% endblock %}
 {% block javascripts %}
 <script src="{{ asset('assets/js/picker.js') }}"></script>
+<script> var url = '{{ path('availability') }}';</script>
 <script>
 $('.datepicker').val('');
 $('.datepicker').pickadate({
@@ -79,7 +80,6 @@ $('.datepicker').pickadate({
          type : 'GET', 
          data : 'date=' + date_visit,
          success: function(reponse) { 
-              var reponse = JSON.parse(reponse);
               if (reponse.quantity >= 1000) {
                   var text = 'Impossible de réserver à cette date là, plus de 1000 billets ont déja été vendus.';
                   $('.datepicker').val('');

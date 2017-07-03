@@ -17,17 +17,17 @@ class Tarif
 	$to   = new \DateTime('today');
 	$age = $from->diff($to)->y;
 
-   switch($age)
+   switch(true)
     {
-    case ($age < 4):
+    case $age < 4:
         $price = 0;
     break;
 
-    case ($age >= 4 AND $age < 12):
+    case $age >= 4 AND $age < 12:
         $price = 8;
     break;
 
-    case ($age >= 12 AND $age < 60):
+    case $age >= 12 AND $age < 60:
         if ($reduced === true) { 
             $price = 10;
         }
@@ -36,7 +36,7 @@ class Tarif
         }
     break;
 
-    case ($age > 60):
+    case $age > 60:
         if ($reduced === true) { 
             $price = 10;
         }
