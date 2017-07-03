@@ -6,7 +6,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
 
 class Check {
 
-	public function dateVerif($date_visit)
+	public function dateVerif(\DateTime $date_visit)
   {
     if ($date_visit->format('N') == 7) {
 

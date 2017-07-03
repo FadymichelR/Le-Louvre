@@ -3,7 +3,6 @@
 namespace AppBundle\Services;
 
 use Symfony\Component\Validator\Constraints\DateTime;
-use \DateTime as toto;
 use Doctrine\ORM\EntityManager;
 use AppBundle\Services\Check;
 
@@ -16,7 +15,7 @@ class Booking
 
   }
 
-  public function checkDate(toto $date_visit)
+  public function checkDate(\DateTime $date_visit)
   {
       $check = new Check();
       return $check->dateVerif($date_visit);
