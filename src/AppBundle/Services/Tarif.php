@@ -8,6 +8,11 @@ class Tarif
 {
 
     private $_total_price = 0;
+    const TARIF_NORMAL = 16;
+    const TARIF_ENFANT = 8;
+    const TARIF_SENIOR = 12;
+    const TARIF_REDUIT = 10;
+    const TARIF_BEBE = 0;
 
 
   public function price($birth,$reduced)
@@ -20,28 +25,28 @@ class Tarif
    switch(true)
     {
     case $age < 4:
-        $price = 0;
+        $price = self::TARIF_BEBE;
     break;
 
     case $age >= 4 AND $age < 12:
-        $price = 8;
+        $price = self::TARIF_ENFANT;
     break;
 
     case $age >= 12 AND $age < 60:
         if ($reduced === true) { 
-            $price = 10;
+            $price = self::TARIF_REDUIT;
         }
         else {
-            $price = 16;
+            $price = self::TARIF_NORMAL;
         }
     break;
 
     case $age > 60:
         if ($reduced === true) { 
-            $price = 10;
+            $price = self::TARIF_REDUIT;
         }
         else {
-            $price = 12;
+            $price = self::TARIF_SENIOR;
         }
     break;
     }
