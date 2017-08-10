@@ -9,23 +9,25 @@ use AppBundle\Services\Check;
 class Booking
 {
   private $_em;
+  private $_check;
+  private $_checkTime;
 
   public function __construct(EntityManager $em) {
     $this->_em = $em;
+    $this->_check = new Check();
+    $this->_checkTime = new CheckTime();
 
   }
 
   public function checkDate(\DateTime $date_visit)
   {
-      $check = new Check();
-      return $check->dateVerif($date_visit);
+      return $this->_check->dateVerif($date_visit);
   }
 
   public function date($type,$date_visit)
   {
 
-    $checkTime = new CheckTime();
-    return $checkTime->checkToday($type,$date_visit);
+    return $this->_checkTime->checkToday($type,$date_visit);
   }
   public function numberOfTickets($day) {
 
