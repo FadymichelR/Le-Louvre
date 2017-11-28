@@ -2,7 +2,6 @@
 namespace Tests\AppBundle\Services;
 use AppBundle\Services\Tarif;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 class TarifTest extends TestCase 
 {

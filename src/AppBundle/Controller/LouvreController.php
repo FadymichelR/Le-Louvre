@@ -108,7 +108,7 @@ class LouvreController extends Controller
     }
     /**
     * @Route("/paiement/{number}", name="paiement")
-    * @Method({"GET"})
+    * @Method({"GET","PUT"})
     */
     public function paiementAction($number, Request $request)
     {

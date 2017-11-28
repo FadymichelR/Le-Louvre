@@ -2,7 +2,6 @@
 namespace Tests\AppBundle\Services;
 use AppBundle\Services\Check;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 class CheckTest extends TestCase 
 {

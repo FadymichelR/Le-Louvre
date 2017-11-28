@@ -1,6 +1,8 @@
 <?php
 
 namespace AppBundle\Services;
+
+use AppBundle\Entity\Billet;
 use AppBundle\Entity\Reservation;
 use Symfony\Component\Validator\Constraints\DateTime;
 
@@ -15,59 +17,64 @@ class Tarif
     const TARIF_BEBE = 0;
 
 
-  public function price($birth,$reduced)
-  {
-
-	$from = new \DateTime($birth);
-	$to   = new \DateTime('today');
-	$age = $from->diff($to)->y;
-
-   switch(true)
+    public function price($birth, $reduced)
     {
-    case $age < 4:
-        $price = self::TARIF_BEBE;
-    break;
 
-    case $age >= 4 AND $age < 12:
-        $price = self::TARIF_ENFANT;
-    break;
+        $from = new \DateTime($birth);
+        $to = new \DateTime('today');
+        $age = $from->diff($to)->y;
 
-    case $age >= 12 AND $age < 60:
-        if ($reduced === true) { 
-            $price = self::TARIF_REDUIT;
-        }
-        else {
-            $price = self::TARIF_NORMAL;
-        }
-    break;
+        switch (true) {
+            case $age < 4:
+                $price = self::TARIF_BEBE;
+                break;
 
-    case $age > 60:
-        if ($reduced === true) { 
-            $price = self::TARIF_REDUIT;
+            case $age >= 4 AND $age < 12:
+                $price = self::TARIF_ENFANT;
+                break;
+
+            case $age >= 12 AND $age < 60:
+                if ($reduced === true) {
+                    $price = self::TARIF_REDUIT;
+                } else {
+                    $price = self::TARIF_NORMAL;
+                }
+                break;
+
+            case $age > 60:
+                if ($reduced === true) {
+                    $price = self::TARIF_REDUIT;
+                } else {
+                    $price = self::TARIF_SENIOR;
+                }
+                break;
         }
-        else {
-            $price = self::TARIF_SENIOR;
-        }
-    break;
+        return $price;
+
     }
-    return $price;
 
-  }
-  public function definePrice(Reservation $reservation) {
+    public function definePrice(Reservation $reservation)
+    {
+        /**
+         * @var Reservation $billetsTab
+         */
+        $billetsTab = $reservation->getBillets();
+        $this->_total_price = 0;
+        foreach ($billetsTab as $billet) {
+            /**
+             * @var Billet $billet
+             */
+            $billet->setPrice($this->price($billet->getBirth()->format('Y-m-d'), $billet->getReducedPrice()));
 
-      $billetsTab = $reservation->getBillets();
-      $this->_total_price = 0;
-      foreach ($billetsTab as $billet) {
-        $billet->setPrice($this->price($billet->getBirth()->format('Y-m-d'),$billet->getReducedPrice()));
+            $this->_total_price += $billet->getPrice();
 
-        $this->_total_price += $billet->getPrice();
+        }
+        $reservation->setTotalPrice($this->getTotalPrice());
+    }
 
-      }
-      $reservation->setTotalPrice($this->getTotalPrice());
-  }
+    public function getTotalPrice()
+    {
 
-  public function getTotalPrice() {
-
-    return $this->_total_price;
+        return $this->_total_price;
     }
 }
