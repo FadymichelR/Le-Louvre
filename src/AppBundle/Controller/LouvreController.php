@@ -15,6 +15,7 @@ use AppBundle\Services\Stripe;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+
 class LouvreController extends Controller
 {
     /**
@@ -62,7 +63,6 @@ class LouvreController extends Controller
             ->setAction($this->generateUrl('booking', array('number' => $booking->getReference())))
             ->setMethod('POST')
             ->add('number', TextType::class, array(
-
               'attr' => array(
                   'placeholder' => 'Numéro de Carte',
                   'type' => 'tel',
@@ -114,8 +114,7 @@ class LouvreController extends Controller
             $token = $session->get('stripeToken');
 
             $stripe = $this->get(Stripe::class);
-            $etatPayment = $stripe->Payment($token,$booking->getEmail(),$booking->getTotalPrice());
-
+            $etatPayment = $stripe->payment($token,$booking->getEmail(),$booking->getTotalPrice());
             if ($etatPayment === true) {
 
               $em = $this->getDoctrine()->getManager();

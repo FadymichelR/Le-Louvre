@@ -9,12 +9,12 @@ class Stripe
 		\Stripe\Stripe::setApiKey('sk_test_HruuLfakh7XU3JQQrawL3Bwd');
 	}
 
-	public function Payment($token,$email,$price) {
+	public function payment($token, $email, $price) {
 
 		$price = $price * 100;
 
 		try {
-          $charge = \Stripe\Charge::create(array(
+          \Stripe\Charge::create(array(
             "amount" => $price, // Amount in cents
             "currency" => "eur",
             "source" => $token,
