@@ -32,25 +32,26 @@ class LouvreController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
-          $booking = $this->get(Booking::class);
+            $booking = $this->get(Booking::class);
 
-          $etat = $booking->limitOfBooking($reservation->getDateVisit(),$reservation->getType());
-          if ($etat !== false) {
-            
-            $form->get($etat['name'])->addError(new FormError($etat['msg']));
-            return $this->render('default/index.html.twig', array('form' => $form->createView()));
-          }
+            $etat = $booking->limitOfBooking($reservation->getDateVisit(), $reservation->getType());
+            if ($etat !== false) {
 
-          $tarif = $this->get(Tarif::class);
-          $tarif->definePrice($reservation);
+                $form->get($etat['name'])->addError(new FormError($etat['msg']));
+                return $this->render('default/index.html.twig', array('form' => $form->createView()));
+            }
 
-          $session = $request->getSession();
-          $session->set($reservation->getReference(), $reservation);
-          return $this->redirectToRoute('booking', array('number' => $reservation->getReference()));
+            $tarif = $this->get(Tarif::class);
+            $tarif->definePrice($reservation);
+
+            $session = $request->getSession();
+            $session->set($reservation->getReference(), $reservation);
+            return $this->redirectToRoute('booking', array('number' => $reservation->getReference()));
 
         }
         return $this->render('default/index.html.twig', array('form' => $form->createView()));
     }
+
     /**
      * @Route("/reservation/{number}", name="booking")
      * @Method({"GET","POST"})
@@ -63,81 +64,81 @@ class LouvreController extends Controller
 
             $defaultData = array('message' => 'Paiement en ligne');
             $form = $this->createFormBuilder($defaultData)
-            ->setAction($this->generateUrl('booking', array('number' => $booking->getReference())))
-            ->setMethod('POST')
-            ->add('number', TextType::class, array(
-              'attr' => array(
-                  'placeholder' => 'Numéro de Carte',
-                  'type' => 'tel',
-                  'data-stripe' => 'number',
-              ))
-            )
-            ->add('expirationmm', TextType::class, array(
-              'attr' => array(
-                  'placeholder' => 'MM',
-                  'data-stripe' => 'exp_month',
-                  'maxlength' => '2',
-              )))
-            ->add('expirationyy', TextType::class, array(
-              'attr' => array(
-                  'placeholder' => 'AA',
-                  'data-stripe' => 'exp_year',
-                  'maxlength' => '2',
-              )))
-            ->add('cvc', TextType::class, array(
-              'attr' => array(
-                  'placeholder' => 'CVC',
-                  'data-stripe' => 'cvc',
-                  'maxlength' => '4',
-              )))
-            ->add('send', SubmitType::class,  array( 'label' => 'Valider le paiement',))
-            ->getForm();
+                ->setAction($this->generateUrl('booking', array('number' => $booking->getReference())))
+                ->setMethod('POST')
+                ->add('number', TextType::class, array(
+                        'attr' => array(
+                            'placeholder' => 'Numéro de Carte',
+                            'type' => 'tel',
+                            'data-stripe' => 'number',
+                        ))
+                )
+                ->add('expirationmm', TextType::class, array(
+                    'attr' => array(
+                        'placeholder' => 'MM',
+                        'data-stripe' => 'exp_month',
+                        'maxlength' => '2',
+                    )))
+                ->add('expirationyy', TextType::class, array(
+                    'attr' => array(
+                        'placeholder' => 'AA',
+                        'data-stripe' => 'exp_year',
+                        'maxlength' => '2',
+                    )))
+                ->add('cvc', TextType::class, array(
+                    'attr' => array(
+                        'placeholder' => 'CVC',
+                        'data-stripe' => 'cvc',
+                        'maxlength' => '4',
+                    )))
+                ->add('send', SubmitType::class, array('label' => 'Valider le paiement',))
+                ->getForm();
 
-              $form->handleRequest($request);
-              if ($form->isSubmitted() && $form->isValid() && $request->request->get('stripeToken') !== null) {
-                  $session->set('stripeToken', $request->request->get('stripeToken'));
-                  return $this->redirectToRoute('paiement', array('number' => $booking->getReference()));
-              }
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid() && $request->request->get('stripeToken') !== null) {
+                $session->set('stripeToken', $request->request->get('stripeToken'));
+                return $this->redirectToRoute('paiement', array('number' => $booking->getReference()));
+            }
 
             return $this->render('default/booking.html.twig', array('data' => $booking, 'form' => $form->createView()));
-        }
-        else {
+        } else {
             throw new NotFoundHttpException('Page innéxistante');
 
         }
     }
+
     /**
-    * @Route("/paiement/{number}", name="paiement")
-    * @Method({"GET","PUT"})
-    */
+     * @Route("/paiement/{number}", name="paiement")
+     * @Method({"GET","PUT"})
+     */
     public function paiementAction($number, Request $request)
     {
-      $session = $request->getSession();
-      if ($session->has($number) && $session->has('stripeToken')) {
+        $session = $request->getSession();
+        if ($session->has($number) && $session->has('stripeToken')) {
             $booking = $session->get($number);
             $token = $session->get('stripeToken');
 
             $stripe = $this->get(Stripe::class);
-            $etatPayment = $stripe->payment($token,$booking->getEmail(),$booking->getTotalPrice());
+            $etatPayment = $stripe->payment($token, $booking->getEmail(), $booking->getTotalPrice());
             if ($etatPayment === true) {
 
-              $em = $this->getDoctrine()->getManager();
-              $em->persist($booking);
-              $em->flush();
-              $session->remove($number);
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($booking);
+                $em->flush();
+                $session->remove($number);
 
-              $mail = $this->get(Mail::class);
-              $mail->send(
-                $booking->getEmail(),
-                'Réservation au musée du louvre confirmée',
-                $this->renderView('mail/reservation.html.twig',array('booking' => $booking))
+                $mail = $this->get(Mail::class);
+                $mail->send(
+                    $booking->getEmail(),
+                    'Réservation au musée du louvre confirmée',
+                    $this->renderView('mail/reservation.html.twig', array('booking' => $booking))
                 );
 
             }
-            return $this->render('default/paiement.html.twig',array('data' => $booking, 'etat' => $etatPayment));
+            return $this->render('default/paiement.html.twig', array('data' => $booking, 'etat' => $etatPayment));
 
-      }
+        }
 
-      throw new NotFoundHttpException('Page innéxistante');
+        throw new NotFoundHttpException('Page innéxistante');
     }
 }
