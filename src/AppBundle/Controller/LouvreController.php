@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Reservation;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,15 +21,16 @@ class LouvreController extends Controller
 {
     /**
      * @Route("/", name="home")
+     * @Method({"GET","POST"})
      */
     public function indexAction(Request $request)
     {
 
-    $reservation = new Reservation();
-    $form   = $this->get('form.factory')->create(ReservationType::class, $reservation);
+        $reservation = new Reservation();
+        $form = $this->get('form.factory')->create(ReservationType::class, $reservation);
 
-
-        if ($request->isMethod('POST') && $form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
 
           $booking = $this->get(Booking::class);
 
@@ -51,6 +53,7 @@ class LouvreController extends Controller
     }
     /**
      * @Route("/reservation/{number}", name="booking")
+     * @Method({"GET","POST"})
      */
     public function bookingAction($number, Request $request)
     {
@@ -105,6 +108,7 @@ class LouvreController extends Controller
     }
     /**
     * @Route("/paiement/{number}", name="paiement")
+    * @Method({"GET","POST"})
     */
     public function paiementAction($number, Request $request)
     {

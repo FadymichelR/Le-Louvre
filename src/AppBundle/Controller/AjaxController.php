@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,6 +14,7 @@ class AjaxController extends Controller
 
     /**
      * @Route("/ajax/availability/", name="availability")
+     * @Method({"GET"})
      */
     public function availabilityAction(Request $request)
     {
